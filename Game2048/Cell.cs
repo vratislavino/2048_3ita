@@ -41,6 +41,7 @@ namespace Game2048
         public Cell() {
             InitializeComponent();
             Value = 0;
+            SetStyle(ControlStyles.Selectable, false);
         }
 
         private void AdjustColor() {

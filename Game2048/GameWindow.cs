@@ -26,5 +26,9 @@ namespace Game2048
         private void OnGameResized(object sender, EventArgs e) {
             this.Size = new Size(game.Width + 16, game.Height + 38);
         }
+
+        private void GameWindow_KeyDown(object sender, KeyEventArgs e) {
+            MessageBox.Show("Key down!");
+        }
     }
 }

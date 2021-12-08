@@ -34,6 +34,7 @@ namespace Game2048
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "Game";
             this.Size = new System.Drawing.Size(597, 547);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Game_KeyDown);
             this.ResumeLayout(false);
 
         }

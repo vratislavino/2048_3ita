@@ -35,6 +35,7 @@ namespace Game2048
             this.ClientSize = new System.Drawing.Size(655, 625);
             this.Name = "GameWindow";
             this.Text = "GameWindow";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyDown);
             this.ResumeLayout(false);
 
         }
