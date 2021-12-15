@@ -67,60 +67,104 @@ namespace Game2048
         private void Game_KeyDown(object sender, KeyEventArgs e) {
             var key = e.KeyCode;
             switch (key) {
-                case Keys.A: MoveRow(true); break;
-                case Keys.D: MoveRow(false); break;
-                case Keys.W: MoveColumn(true); break;
-                case Keys.S: MoveColumn(false); break;
+                case Keys.A: MoveGroup(true, true); break;
+                case Keys.D: MoveGroup(false, true); break;
+                case Keys.W: MoveGroup(true, false); break;
+                case Keys.S: MoveGroup(false, false); break;
+            }
+            if (!IsEnd()) {
+                if (IsAnyPlaceEmpty()) {
+                    AddRandomNumber(GenerateNumber());
+                } else {
+                    MessageBox.Show("Nebuď bukva, koukej trochu...");
+                }
+            } else {
+                MessageBox.Show("Konec hry!");
             }
         }
 
-        private void MoveRow(bool isNegative) {
-            List<Cell> row = new List<Cell>();
-            for (int i = 0; i < 4; i++) { // cyklus pro řádky
-                for (int j = 0; j < 4; j++) {
-                    if (cells[j, i].Value > 0)
-                        row.Add(cells[j, i]);
+        private bool IsAnyPlaceEmpty() {
+            foreach (var cell in cells) {
+                if (cell.Value == 0) // našlo se prázdné pole, není konec hry
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsEnd() {
+            foreach(var cell in cells) {
+                if (cell.Value == 0) // našlo se prázdné pole, není konec hry
+                    return false; 
+            }
+
+            List<Cell> group = new List<Cell>();
+            for (int k = 0; k <= 1; k++) {
+                for (int i = 0; i < size; i++) {
+                    group = GetGroup(k == 0, i, group);
+                    for (int j = 0; j < group.Count - 1; j++) {
+                        if (group[j].Value == group[j + 1].Value) {
+                            return false;
+                        }
+                    }
+                    group.Clear();
                 }
+            }
+
+            return true;
+        }
+
+        private Cell GetCell(bool isRow, int i, int j) {
+            return isRow ? cells[j, i] : cells[i, j];
+        }
+
+        private List<Cell> GetGroup(bool isRow, int i, List<Cell> group) { 
+            for (int j = 0; j < 4; j++) {
+                if (GetCell(isRow, i, j).Value > 0)
+                    group.Add(GetCell(isRow, i, j));
+            }
+            return group;
+        }
+
+        private void MoveGroup(bool isNegative, bool isRow) {
+            List<Cell> group = new List<Cell>();
+            for (int i = 0; i < size; i++) { // cyklus pro řádky
+                group = GetGroup(isRow, i, group);
                 // Máme list obsahující posloupnost nenulových čtverečků
                 // Spojování
-                if (row.Count > 1) {
-                    if(isNegative)
-                        row.Reverse(); // otočení listu, pokud potřebujeme jet zprava
-                    for (int j = 0; j < row.Count - 1; j++) {
-                        if (row[j].Value == row[j + 1].Value) {
-                            row[j].Value *= 2;
-                            row.RemoveAt(j + 1);
+                if (group.Count > 1) {
+                    if (isNegative)
+                        group.Reverse(); // otočení listu, pokud potřebujeme jet zprava
+                    for (int j = 0; j < group.Count - 1; j++) {
+                        if (group[j].Value == group[j + 1].Value) {
+                            group[j].Value *= 2;
+                            group.RemoveAt(j + 1);
                             // SPOJIT 2 PRVKY
                         }
                     }
-                    if(isNegative)
-                        row.Reverse();
+                    if (isNegative)
+                        group.Reverse();
                 }
                 // srovnání na stranu
                 if (isNegative) {
                     for (int j = 0; j < 4; j++) {
-                        if (j < row.Count) {
-                            cells[j, i].Value = row[j].Value;
+                        if (j < group.Count) {
+                            GetCell(isRow, i, j).Value = group[j].Value;
                         } else {
-                            cells[j, i].Value = 0;
+                            GetCell(isRow, i, j).Value = 0;
                         }
                     }
                 } else {
                     for (int j = 3; j >= 0; j--) {
-                        if (row.Count > 0) {
-                            cells[j, i].Value = row.Last().Value;
-                            row.RemoveAt(row.Count - 1);
+                        if (group.Count > 0) {
+                            GetCell(isRow, i, j).Value = group.Last().Value;
+                            group.RemoveAt(group.Count - 1);
                         } else {
-                            cells[j, i].Value = 0;
+                            GetCell(isRow, i, j).Value = 0;
                         }
                     }
                 }
-                row.Clear();
+                group.Clear();
             }
-        }
-
-        private void MoveColumn(bool isNegative) {
-            MessageBox.Show("Column" + isNegative);
         }
     }
 }
